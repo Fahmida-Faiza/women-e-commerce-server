@@ -28,6 +28,7 @@ async function run() {
     await client.connect();
     // load the dataset
     const userCollection = client.db("womenDb").collection("users");
+    const contactCollection = client.db("womenDb").collection("contact");
     const dataCollection = client.db("womenDb").collection("data");
     const cartCollection = client.db("womenDb").collection("carts");
     const menuCollection = client.db("womenDb").collection("menu");
@@ -76,7 +77,7 @@ async function run() {
 
     // user related api
     //
-    app.get("/users", verifyToken,verifyAdmin, async (req, res) => {
+    app.get("/users", verifyToken, verifyAdmin, async (req, res) => {
       const result = await userCollection.find().toArray();
       res.send(result);
     });
@@ -97,31 +98,32 @@ async function run() {
       res.send({ admin });
     });
 
-
-    // 
+    //
     // app.post("/users", async (req, res) => {
     //   const user = req.body;
     //   const result = await userCollection.insertOne(user);
     //   res.send(result);
     // });
-// ////////////////extra add korsi
-  app.post("/users", async (req, res) => {
-    const user = req.body;
-    // insert email if user doesnt exists:
-    // you can do this many ways (1. email unique, 2. upsert 3. simple checking)
-    const query = { email: user.email };
-    const existingUser = await userCollection.findOne(query);
-    if (existingUser) {
-      return res.send({ message: "user already exists", insertedId: null });
-    }
-    const result = await userCollection.insertOne(user);
-    res.send(result);
-  });
+    // ////////////////extra add korsi
+    app.post("/users", async (req, res) => {
+      const user = req.body;
+      // insert email if user doesnt exists:
+      // you can do this many ways (1. email unique, 2. upsert 3. simple checking)
+      const query = { email: user.email };
+      const existingUser = await userCollection.findOne(query);
+      if (existingUser) {
+        return res.send({ message: "user already exists", insertedId: null });
+      }
+      const result = await userCollection.insertOne(user);
+      res.send(result);
+    });
 
     // //////////////
 
     app.patch(
-      "/users/admin/:id",verifyToken,verifyAdmin,
+      "/users/admin/:id",
+      verifyToken,
+      verifyAdmin,
 
       async (req, res) => {
         const id = req.params.id;
@@ -136,7 +138,7 @@ async function run() {
       }
     );
     // delete user
-    app.delete("/users/:id",verifyToken,verifyAdmin, async (req, res) => {
+    app.delete("/users/:id", verifyToken, verifyAdmin, async (req, res) => {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
       const result = await userCollection.deleteOne(query);
@@ -166,26 +168,31 @@ async function run() {
       const result = await cartCollection.deleteOne(query);
       res.send(result);
     });
-
+    // ///////contact create
+    //   
+    app.post("/contact", async (req, res) => {
+      const contactItem = req.body;
+      const result = await contactCollection.insertOne(contactItem);
+      res.send(result);
+    });
     // //////////
-  // menu related aoi
- app.get("/menu", async (req, res) => {
- 
-   const result = await menuCollection.find().toArray();
-   res.send(result);
- });
+    // // menu related aoi
+    app.get("/menu", async (req, res) => {
+      const result = await menuCollection.find().toArray();
+      res.send(result);
+    });
 
- app.post("/menu", verifyToken,verifyAdmin,async (req, res) => {
-   const item = req.body;
-   const result = await menuCollection.insertOne(item);
-   res.send(result);
- });
-  app.get("/menu/:id", async (req, res) => {
-    const id = req.params.id;
-    const query = { _id: new ObjectId(id) };
-    const result = await menuCollection.findOne(query);
-    res.send(result);
-  });
+    app.post("/menu", verifyToken, verifyAdmin, async (req, res) => {
+      const item = req.body;
+      const result = await menuCollection.insertOne(item);
+      res.send(result);
+    });
+    app.get("/menu/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await menuCollection.findOne(query);
+      res.send(result);
+    });
 
     app.patch("/menu/:id", async (req, res) => {
       const item = req.body;
@@ -205,16 +212,12 @@ async function run() {
       res.send(result);
     });
 
-  app.delete("/menu/:id", verifyToken, verifyAdmin, async (req, res) => {
-    const id = req.params.id;
-    const query = { _id: new ObjectId(id) };
-    const result = await menuCollection.deleteOne(query);
-    res.send(result);
-  });
-
-
-
-
+    app.delete("/menu/:id", verifyToken, verifyAdmin, async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await menuCollection.deleteOne(query);
+      res.send(result);
+    });
 
     ////////////////////
 
