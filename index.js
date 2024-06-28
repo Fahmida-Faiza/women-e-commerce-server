@@ -29,6 +29,7 @@ async function run() {
     // load the dataset
     const userCollection = client.db("womenDb").collection("users");
     const contactCollection = client.db("womenDb").collection("contact");
+    const formCollection = client.db("womenDb").collection("form");
     const dataCollection = client.db("womenDb").collection("data");
     const cartCollection = client.db("womenDb").collection("carts");
     const menuCollection = client.db("womenDb").collection("menu");
@@ -175,6 +176,16 @@ async function run() {
       const result = await contactCollection.insertOne(contactItem);
       res.send(result);
     });
+
+
+    // ///////////form create
+    app.post("/form", async (req, res) => {
+      const formItem = req.body;
+      const result = await formCollection.insertOne(formItem);
+      res.send(result);
+    });
+
+    
     // //////////
     // // menu related aoi
     app.get("/menu", async (req, res) => {
